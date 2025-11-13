@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/smelt02/touhou-local-sync/pkg/backup"
-	"github.com/smelt02/touhou-local-sync/pkg/pathdetect"
-	"github.com/smelt02/touhou-local-sync/pkg/sync"
+	"github.com/otagao/touhou-local-sync/pkg/backup"
+	"github.com/otagao/touhou-local-sync/pkg/pathdetect"
+	"github.com/otagao/touhou-local-sync/pkg/sync"
 	"github.com/spf13/cobra"
 )
 
