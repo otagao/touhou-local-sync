@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/smelt02/touhou-local-sync/internal/models"
-	"github.com/smelt02/touhou-local-sync/pkg/backup"
-	"github.com/smelt02/touhou-local-sync/pkg/process"
-	"github.com/smelt02/touhou-local-sync/pkg/utils"
+	"github.com/otagao/touhou-local-sync/internal/models"
+	"github.com/otagao/touhou-local-sync/pkg/backup"
+	"github.com/otagao/touhou-local-sync/pkg/process"
+	"github.com/otagao/touhou-local-sync/pkg/utils"
 )
 
 // PullFile synchronizes a file from local to USB (vault).
