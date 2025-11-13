@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/smelt02/touhou-local-sync/pkg/utils"
+	"github.com/otagao/touhou-local-sync/pkg/utils"
 )
 
 // GetDeviceID generates a unique device ID based on hostname and primary MAC address.

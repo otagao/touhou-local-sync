@@ -1,4 +1,4 @@
-module github.com/smelt02/touhou-local-sync
+module github.com/otagao/touhou-local-sync
 
 go 1.25.0
 

@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/smelt02/touhou-local-sync/internal/models"
-	"github.com/smelt02/touhou-local-sync/pkg/config"
-	"github.com/smelt02/touhou-local-sync/pkg/device"
-	"github.com/smelt02/touhou-local-sync/pkg/pathdetect"
+	"github.com/otagao/touhou-local-sync/internal/models"
+	"github.com/otagao/touhou-local-sync/pkg/config"
+	"github.com/otagao/touhou-local-sync/pkg/device"
+	"github.com/otagao/touhou-local-sync/pkg/pathdetect"
 	"github.com/spf13/cobra"
 )
 

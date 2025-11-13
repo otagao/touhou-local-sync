@@ -3,8 +3,8 @@ package sync
 import (
 	"fmt"
 
-	"github.com/smelt02/touhou-local-sync/internal/models"
-	"github.com/smelt02/touhou-local-sync/pkg/utils"
+	"github.com/otagao/touhou-local-sync/internal/models"
+	"github.com/otagao/touhou-local-sync/pkg/utils"
 )
 
 const (

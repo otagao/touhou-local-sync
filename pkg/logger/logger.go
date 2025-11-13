@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/smelt02/touhou-local-sync/pkg/utils"
+	"github.com/otagao/touhou-local-sync/pkg/utils"
 )
 
 const (

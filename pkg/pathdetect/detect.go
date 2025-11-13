@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/smelt02/touhou-local-sync/internal/models"
-	"github.com/smelt02/touhou-local-sync/pkg/sync"
-	"github.com/smelt02/touhou-local-sync/pkg/utils"
+	"github.com/otagao/touhou-local-sync/internal/models"
+	"github.com/otagao/touhou-local-sync/pkg/sync"
+	"github.com/otagao/touhou-local-sync/pkg/utils"
 )
 
 // DetectResult represents the result of detecting save files.
