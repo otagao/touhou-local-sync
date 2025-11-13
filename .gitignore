@@ -41,5 +41,6 @@ vendor/
 *.bak
 
 # Documentation (private)
-/docs/specs_windows_cli.md
+docs/
+.claude
 CLAUDE.md
