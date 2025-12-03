@@ -73,71 +73,136 @@ func CompareFiles(local, remote *models.FileMetadata) *models.ComparisonResult {
 
 	result.HashMatch = false
 
-	// 2. Hash differs - compare size and mtime
+	// 2. Hash differs - analyze both size and mtime as equal evidence
 
-	// 2a. Size differs
-	if result.SizeDiff != 0 {
-		// Check for suspicious size increase
-		var sizeRatio float64
-		if result.SizeDiff > 0 {
-			// Local is larger
-			if remote.Size > 0 {
-				sizeRatio = float64(local.Size) / float64(remote.Size)
-			} else {
-				sizeRatio = 999.0 // Remote is empty
-			}
+	// Determine size preference
+	var sizePreference string // "local", "remote", or "equal"
+	var sizeRatio float64
 
-			if sizeRatio > MaxSizeRatio {
-				result.Recommendation = "CONFLICT"
-				result.Reason = fmt.Sprintf("local file suspiciously large (%.1fx larger, local=%d remote=%d)", sizeRatio, local.Size, remote.Size)
-				return result
-			}
-
-			result.Recommendation = "PULL"
-			result.Reason = fmt.Sprintf("local file is larger (local=%d remote=%d)", local.Size, remote.Size)
-			return result
+	if result.SizeDiff > 0 {
+		// Local is larger
+		sizePreference = "local"
+		if remote.Size > 0 {
+			sizeRatio = float64(local.Size) / float64(remote.Size)
 		} else {
-			// Remote is larger
-			if local.Size > 0 {
-				sizeRatio = float64(remote.Size) / float64(local.Size)
-			} else {
-				sizeRatio = 999.0 // Local is empty
-			}
+			sizeRatio = 999.0 // Remote is empty
+		}
 
-			if sizeRatio > MaxSizeRatio {
-				result.Recommendation = "CONFLICT"
-				result.Reason = fmt.Sprintf("remote file suspiciously large (%.1fx larger, remote=%d local=%d)", sizeRatio, remote.Size, local.Size)
-				return result
-			}
-
-			result.Recommendation = "PUSH"
-			result.Reason = fmt.Sprintf("remote file is larger (remote=%d local=%d)", remote.Size, local.Size)
+		if sizeRatio > MaxSizeRatio {
+			result.Recommendation = "CONFLICT"
+			result.Reason = fmt.Sprintf("local file suspiciously large (%.1fx larger, local=%d remote=%d)", sizeRatio, local.Size, remote.Size)
 			return result
 		}
+	} else if result.SizeDiff < 0 {
+		// Remote is larger
+		sizePreference = "remote"
+		if local.Size > 0 {
+			sizeRatio = float64(remote.Size) / float64(local.Size)
+		} else {
+			sizeRatio = 999.0 // Local is empty
+		}
+
+		if sizeRatio > MaxSizeRatio {
+			result.Recommendation = "CONFLICT"
+			result.Reason = fmt.Sprintf("remote file suspiciously large (%.1fx larger, remote=%d local=%d)", sizeRatio, remote.Size, local.Size)
+			return result
+		}
+	} else {
+		// Sizes are equal
+		sizePreference = "equal"
 	}
 
-	// 2b. Size is the same, compare mtime
+	// Determine time preference
+	var timePreference string // "local", "remote", or "equal"
+
 	if utils.TimeWithinDrift(local.ModTime, remote.ModTime) {
-		// Times are essentially the same
+		timePreference = "equal"
+	} else if utils.IsNewerThan(local.ModTime, remote.ModTime) {
+		timePreference = "local"
+	} else {
+		timePreference = "remote"
+	}
+
+	// Combine size and time evidence
+	// If both agree or one is equal, make a clear recommendation
+	// If they conflict, flag as CONFLICT for user confirmation
+
+	if sizePreference == "equal" && timePreference == "equal" {
+		// Both equal - files are essentially the same
 		result.Recommendation = "SKIP"
 		result.Reason = fmt.Sprintf("files appear identical (size=%d, mtime within %ds drift)", local.Size, utils.TimeDriftTolerance)
 		return result
 	}
 
-	// Times differ beyond drift tolerance
-	if utils.IsNewerThan(local.ModTime, remote.ModTime) {
+	if sizePreference == "local" && timePreference == "local" {
+		// Both prefer local - clear PULL
 		result.Recommendation = "PULL"
-		result.Reason = fmt.Sprintf("local file is newer (local=%s remote=%s, diff=%ds)",
+		result.Reason = fmt.Sprintf("local file is both larger and newer (size: local=%d remote=%d, time: local=%s remote=%s)",
+			local.Size, remote.Size,
 			local.ModTime.Format("2006-01-02 15:04:05"),
-			remote.ModTime.Format("2006-01-02 15:04:05"),
-			result.TimeDiff)
-		return result
-	} else {
-		result.Recommendation = "PUSH"
-		result.Reason = fmt.Sprintf("remote file is newer (remote=%s local=%s, diff=%ds)",
-			remote.ModTime.Format("2006-01-02 15:04:05"),
-			local.ModTime.Format("2006-01-02 15:04:05"),
-			-result.TimeDiff)
+			remote.ModTime.Format("2006-01-02 15:04:05"))
 		return result
 	}
+
+	if sizePreference == "remote" && timePreference == "remote" {
+		// Both prefer remote - clear PUSH
+		result.Recommendation = "PUSH"
+		result.Reason = fmt.Sprintf("remote file is both larger and newer (size: remote=%d local=%d, time: remote=%s local=%s)",
+			remote.Size, local.Size,
+			remote.ModTime.Format("2006-01-02 15:04:05"),
+			local.ModTime.Format("2006-01-02 15:04:05"))
+		return result
+	}
+
+	if sizePreference == "equal" {
+		// Size equal, time differs - use time preference
+		if timePreference == "local" {
+			result.Recommendation = "PULL"
+			result.Reason = fmt.Sprintf("local file is newer (size equal=%d, time: local=%s remote=%s, diff=%ds)",
+				local.Size,
+				local.ModTime.Format("2006-01-02 15:04:05"),
+				remote.ModTime.Format("2006-01-02 15:04:05"),
+				result.TimeDiff)
+			return result
+		} else {
+			result.Recommendation = "PUSH"
+			result.Reason = fmt.Sprintf("remote file is newer (size equal=%d, time: remote=%s local=%s, diff=%ds)",
+				local.Size,
+				remote.ModTime.Format("2006-01-02 15:04:05"),
+				local.ModTime.Format("2006-01-02 15:04:05"),
+				-result.TimeDiff)
+			return result
+		}
+	}
+
+	if timePreference == "equal" {
+		// Time equal, size differs - use size preference
+		if sizePreference == "local" {
+			result.Recommendation = "PULL"
+			result.Reason = fmt.Sprintf("local file is larger (size: local=%d remote=%d, time within drift)",
+				local.Size, remote.Size)
+			return result
+		} else {
+			result.Recommendation = "PUSH"
+			result.Reason = fmt.Sprintf("remote file is larger (size: remote=%d local=%d, time within drift)",
+				remote.Size, local.Size)
+			return result
+		}
+	}
+
+	// If we reach here, size and time preferences conflict
+	// Example: local is larger but remote is newer, or vice versa
+	result.Recommendation = "CONFLICT"
+	if sizePreference == "local" && timePreference == "remote" {
+		result.Reason = fmt.Sprintf("evidence conflict: local is larger (%d vs %d) but remote is newer (%s vs %s)",
+			local.Size, remote.Size,
+			remote.ModTime.Format("2006-01-02 15:04:05"),
+			local.ModTime.Format("2006-01-02 15:04:05"))
+	} else {
+		result.Reason = fmt.Sprintf("evidence conflict: remote is larger (%d vs %d) but local is newer (%s vs %s)",
+			remote.Size, local.Size,
+			local.ModTime.Format("2006-01-02 15:04:05"),
+			remote.ModTime.Format("2006-01-02 15:04:05"))
+	}
+	return result
 }
