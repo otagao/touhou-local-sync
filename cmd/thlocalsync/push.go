@@ -140,6 +140,44 @@ func pushTitle(title, deviceID string, pathsConfig *models.PathsConfig, log *log
 		return err
 	}
 
+	// Handle CONFLICT - ask user for resolution
+	if comparison.Recommendation == "CONFLICT" {
+		choice := promptUserForConflictResolution(title, comparison, "push")
+		switch choice {
+		case "local":
+			// User chose local - skip (keep local version)
+			fmt.Printf("- %s: Kept local version (user choice)\n", title)
+			log.Info("push_skip", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"reason": "user resolved conflict - chose local",
+			})
+		case "remote":
+			// User chose remote - force push
+			comparison, err = sync.ForcePushFile(title, vaultPath, localPath)
+			if err != nil {
+				return fmt.Errorf("failed to force push: %w", err)
+			}
+			fmt.Printf("✓ %s: Pushed to local (user chose remote)\n", title)
+			log.Info("push", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"action": "update",
+				"from":   "usb",
+				"to":     "local",
+				"reason": "user resolved conflict - chose remote",
+			})
+		case "cancel":
+			fmt.Printf("- %s: Cancelled by user\n", title)
+			log.Info("push_cancel", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"reason": "user cancelled conflict resolution",
+			})
+		}
+		return nil
+	}
+
 	// Report result
 	switch comparison.Recommendation {
 	case "PUSH":
@@ -157,8 +195,6 @@ func pushTitle(title, deviceID string, pathsConfig *models.PathsConfig, log *log
 		fmt.Printf("- %s: Skipped (%s)\n", title, comparison.Reason)
 	case "PULL":
 		fmt.Printf("- %s: Local is newer, skipped (%s)\n", title, comparison.Reason)
-	case "CONFLICT":
-		fmt.Printf("⚠ %s: Conflict detected (%s)\n", title, comparison.Reason)
 	}
 
 	return nil

@@ -37,6 +37,32 @@ func PullFile(title string, localPath string, vaultPath string) (*models.Compari
 		return comparison, nil
 	}
 
+	return executePull(title, localPath, vaultPath, vaultMeta, comparison)
+}
+
+// ForcePullFile forces a pull operation regardless of comparison result.
+// Used when user explicitly chooses to use local file after conflict resolution.
+func ForcePullFile(title string, localPath string, vaultPath string) (*models.ComparisonResult, error) {
+	// Get metadata for both files
+	localMeta, err := GetFileMetadata(localPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get local metadata: %w", err)
+	}
+
+	vaultMeta, err := GetFileMetadata(vaultPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vault metadata: %w", err)
+	}
+
+	// Compare files to get metadata, but ignore recommendation
+	comparison := CompareFiles(localMeta, vaultMeta)
+	comparison.Recommendation = "PULL" // Force PULL
+
+	return executePull(title, localPath, vaultPath, vaultMeta, comparison)
+}
+
+// executePull performs the actual pull operation.
+func executePull(title string, localPath string, vaultPath string, vaultMeta *models.FileMetadata, comparison *models.ComparisonResult) (*models.ComparisonResult, error) {
 	// Ensure vault directory exists
 	vaultDir := filepath.Dir(vaultPath)
 	if err := utils.EnsureDir(vaultDir); err != nil {
@@ -105,6 +131,41 @@ func PushFile(title string, vaultPath string, localPath string, force bool) (*mo
 		}
 	}
 
+	return executePush(title, vaultPath, localPath, localMeta, comparison)
+}
+
+// ForcePushFile forces a push operation regardless of comparison result.
+// Used when user explicitly chooses to use remote file after conflict resolution.
+func ForcePushFile(title string, vaultPath string, localPath string) (*models.ComparisonResult, error) {
+	// Check if it's safe to write to local file
+	safe, reason, err := process.CanSafelyWrite(localPath, title)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if safe to write: %w", err)
+	}
+	if !safe {
+		return nil, fmt.Errorf("cannot push: %s", reason)
+	}
+
+	// Get metadata for both files
+	vaultMeta, err := GetFileMetadata(vaultPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get vault metadata: %w", err)
+	}
+
+	localMeta, err := GetFileMetadata(localPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get local metadata: %w", err)
+	}
+
+	// Compare files to get metadata, but ignore recommendation
+	comparison := CompareFiles(localMeta, vaultMeta)
+	comparison.Recommendation = "PUSH" // Force PUSH
+
+	return executePush(title, vaultPath, localPath, localMeta, comparison)
+}
+
+// executePush performs the actual push operation.
+func executePush(title string, vaultPath string, localPath string, localMeta *models.FileMetadata, comparison *models.ComparisonResult) (*models.ComparisonResult, error) {
 	// Ensure local directory exists
 	localDir := filepath.Dir(localPath)
 	if err := utils.EnsureDir(localDir); err != nil {
