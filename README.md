@@ -165,6 +165,48 @@ GOOS=windows GOARCH=amd64 go build -o thlocalsync.exe ./cmd/thlocalsync
 go test ./...
 ```
 
+### ライセンス管理
+
+このプロジェクトでは、依存ライブラリのライセンス情報を自動管理しています。
+
+#### ライセンス情報の更新
+
+依存関係を追加・更新した際は、NOTICEファイルを更新してください：
+
+```bash
+# Windows（WSL2環境）で実行
+wsl make license-generate
+
+# または、GitHub Actions上で自動実行（推奨）
+```
+
+#### ライセンスチェック
+
+禁止ライセンスの使用を検証：
+
+```bash
+# ローカルでチェック（WSL2環境）
+wsl make license-check
+
+# 完全な監査（チェック + 生成）
+wsl make license-audit
+```
+
+#### 自動検証
+
+GitHub Actions により、以下のタイミングで自動的にライセンス検証が実行されます：
+- `go.mod` または `go.sum` の変更時
+- Pull Request作成時
+
+許可されているライセンス：
+- MIT
+- Apache-2.0
+- BSD-2-Clause
+- BSD-3-Clause
+- ISC
+
+詳細は [NOTICE](NOTICE) ファイルを参照してください。
+
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
