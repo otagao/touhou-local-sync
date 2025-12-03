@@ -1,0 +1,26 @@
+NOTICE - Third-Party Software Licenses
+=======================================
+
+This software includes components distributed under the following licenses:
+
+{{range $i, $dep := . -}}
+-------------------------------------------------------------------------------
+{{add $i 1}}. {{.Name}}
+   {{.LicenseURL}}
+   Version: {{.Version}}
+   License: {{.LicenseName}}
+{{- with .LicenseText}}
+
+{{.}}
+{{- end}}
+
+{{end -}}
+===============================================================================
+
+For the complete list of dependencies, please refer to the go.mod file in the
+source repository.
+
+Full license texts can be found at:
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+- MIT License: https://opensource.org/licenses/MIT
+- BSD Licenses: https://opensource.org/licenses/BSD-3-Clause
