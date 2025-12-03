@@ -129,6 +129,44 @@ func pullTitle(title, deviceID string, pathsConfig *models.PathsConfig, log *log
 		return err
 	}
 
+	// Handle CONFLICT - ask user for resolution
+	if comparison.Recommendation == "CONFLICT" {
+		choice := promptUserForConflictResolution(title, comparison, "pull")
+		switch choice {
+		case "local":
+			// User chose local - force pull
+			comparison, err = sync.ForcePullFile(title, localPath, vaultPath)
+			if err != nil {
+				return fmt.Errorf("failed to force pull: %w", err)
+			}
+			fmt.Printf("✓ %s: Pulled to USB (user chose local)\n", title)
+			log.Info("pull", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"action": "update",
+				"from":   "local",
+				"to":     "usb",
+				"reason": "user resolved conflict - chose local",
+			})
+		case "remote":
+			// User chose remote - skip (keep USB version)
+			fmt.Printf("- %s: Kept USB version (user choice)\n", title)
+			log.Info("pull_skip", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"reason": "user resolved conflict - chose remote",
+			})
+		case "cancel":
+			fmt.Printf("- %s: Cancelled by user\n", title)
+			log.Info("pull_cancel", map[string]interface{}{
+				"title":  title,
+				"device": deviceID,
+				"reason": "user cancelled conflict resolution",
+			})
+		}
+		return nil
+	}
+
 	// Report result
 	switch comparison.Recommendation {
 	case "PULL":
@@ -146,8 +184,6 @@ func pullTitle(title, deviceID string, pathsConfig *models.PathsConfig, log *log
 		fmt.Printf("- %s: Skipped (%s)\n", title, comparison.Reason)
 	case "PUSH":
 		fmt.Printf("- %s: USB is newer, skipped (%s)\n", title, comparison.Reason)
-	case "CONFLICT":
-		fmt.Printf("⚠ %s: Conflict detected (%s)\n", title, comparison.Reason)
 	}
 
 	return nil
