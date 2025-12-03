@@ -8,6 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// These variables are set at build time via ldflags
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "thlocalsync",
 	Short: "東方Project セーブデータ同期ツール",
@@ -16,10 +23,13 @@ var rootCmd = &cobra.Command{
 完全オフライン、ポータブルストレージ常駐、単一実行ファイル。
 タイトル別の保存パスを半自動認識＋対話的に登録/編集。
 mtime・ハッシュ・サイズの三点で新旧/正誤判定。`,
-	Version: "0.1.0",
+	Version: version,
 }
 
 func init() {
+	// Set custom version template
+	rootCmd.SetVersionTemplate(fmt.Sprintf("thlocalsync %s (commit: %s, built: %s)\n", version, commit, date))
+
 	// Add subcommands
 	rootCmd.AddCommand(detectCmd)
 	rootCmd.AddCommand(statusCmd)

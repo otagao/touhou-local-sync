@@ -1,0 +1,154 @@
+# GoReleaser configuration for touhou-local-sync
+version: 2
+
+# Project metadata
+project_name: thlocalsync
+
+# Build configuration
+builds:
+  - id: windows-build
+    main: ./cmd/thlocalsync
+    binary: thlocalsync
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+# Archive configuration
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    files:
+      - README.md
+      - LICENSE
+      - NOTICE
+
+# Checksum generation
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+# Changelog configuration
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - 'typo'
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Others
+      order: 999
+
+# Release configuration
+release:
+  github:
+    owner: otagao
+    name: touhou-local-sync
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
+  header: |
+    ## 東方Project セーブデータ同期ツール v{{.Version}}
+
+    Windows専用のUSBメモリを使った東方Projectセーブデータ同期CLIツールです。
+
+    ### インストール方法
+
+    1. お使いのアーキテクチャに合ったZIPファイルをダウンロード
+       - 通常のWindows PC: `thlocalsync_{{.Version}}_windows_amd64.zip`
+       - ARM64版Windows: `thlocalsync_{{.Version}}_windows_arm64.zip`
+    2. ZIPを解凍し、`thlocalsync.exe`をUSBメモリの`/THLocalSync/`ディレクトリに配置
+    3. コマンドプロンプトまたはPowerShellから実行
+
+    ### 使い方
+
+    ```bash
+    # セーブデータの自動検出と登録
+    thlocalsync.exe detect
+
+    # 現在の状態確認
+    thlocalsync.exe status all
+
+    # USBへのプル（ローカル → USB）
+    thlocalsync.exe pull all
+
+    # ローカルへのプッシュ（USB → ローカル）
+    thlocalsync.exe push all
+    ```
+
+    詳細な使用方法は [README.md](https://github.com/otagao/touhou-local-sync/blob/main/README.md) をご確認ください。
+  footer: |
+    ---
+
+    ## ⚖️ ライセンス情報 / License Information
+
+    **本ソフトウェアのライセンス:**
+    - MIT License（詳細は [LICENSE](https://github.com/otagao/touhou-local-sync/blob/main/LICENSE) を参照）
+    - Copyright (c) 2025 otagao
+
+    **含まれるオープンソースコンポーネント:**
+
+    このリリースには以下のオープンソースライブラリが含まれています：
+
+    | ライブラリ | バージョン | ライセンス |
+    |-----------|-----------|-----------|
+    | [spf13/cobra](https://github.com/spf13/cobra) | v1.10.1 | Apache License 2.0 |
+    | [spf13/pflag](https://github.com/spf13/pflag) | v1.0.9 | BSD-3-Clause |
+    | [inconshreveable/mousetrap](https://github.com/inconshreveable/mousetrap) | v1.1.0 | Apache License 2.0 |
+    | [russross/blackfriday](https://github.com/russross/blackfriday) | v2.1.0 | BSD-2-Clause |
+    | [cpuguy83/go-md2man](https://github.com/cpuguy83/go-md2man) | v2.0.6 | MIT License |
+    | [go-yaml/yaml](https://github.com/go-yaml/yaml) | v3.0.1 | MIT & Apache 2.0 |
+    | [Go Language](https://go.dev/) | 1.23+ | BSD-3-Clause |
+
+    完全なライセンステキストは [NOTICE](https://github.com/otagao/touhou-local-sync/blob/main/NOTICE) ファイルをご確認ください。
+
+    ---
+
+    ## 🔐 セキュリティ / Security
+
+    セキュリティ上の問題を発見した場合は、公開イシューではなく[セキュリティアドバイザリ](https://github.com/otagao/touhou-local-sync/security/advisories/new)で報告してください。
+
+    ---
+
+    ## 🙏 謝辞 / Acknowledgments
+
+    このプロジェクトは上記のオープンソースコミュニティの素晴らしい成果物の上に成り立っています。
+    各プロジェクトのメンテナーと貢献者の皆様に感謝いたします。
+
+    ---
+
+    **Full Changelog**: https://github.com/otagao/touhou-local-sync/compare/{{.PreviousTag}}...{{.Tag}}
+
+# Snapshot configuration (for testing)
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+# Announce (optional - uncomment if you want notifications)
+# announce:
+#   discord:
+#     enabled: true
+#     message_template: 'New release: {{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}'
