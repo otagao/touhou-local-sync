@@ -22,6 +22,22 @@ jobs:
         with:
           go-version: '1.23'
 
+      - name: Install go-licenses
+        run: go install github.com/google/go-licenses@latest
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/generate-license-table.sh
+          chmod +x scripts/generate-release-footer.sh
+
+      - name: Generate release footer
+        id: footer
+        run: |
+          FOOTER=$(./scripts/generate-release-footer.sh)
+          echo "RELEASE_FOOTER<<EOF" >> $GITHUB_ENV
+          echo "$FOOTER" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -30,3 +46,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_FOOTER_CONTENT: ${{ env.RELEASE_FOOTER }}
