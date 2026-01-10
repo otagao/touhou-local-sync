@@ -207,6 +207,16 @@ GitHub Actions により、以下のタイミングで自動的にライセン�
 
 詳細は [NOTICE](NOTICE) ファイルを参照してください。
 
+### 依存関係の自動更新
+
+このプロジェクトは [Dependabot](https://docs.github.com/en/code-security/dependabot) による依存関係の自動更新を有効化しています。
+
+- **通常更新**: 毎週月曜に自動PR作成
+- **セキュリティ更新**: 毎日チェック＋即座にPR作成
+- **自動マージ**: patch/minor アップデートは自動承認（ライセンス検証通過後）
+
+開発者は NOTICE ファイルの手動更新のみ必要です。詳細は [CLAUDE.md](CLAUDE.md) を参照してください。
+
 ## ライセンス
 
 このプロジェクトは MIT ライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
