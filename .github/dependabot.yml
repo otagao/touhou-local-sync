@@ -1,12 +1,11 @@
 version: 2
 updates:
-  # Go モジュールの依存関係更新（週次）
+  # Go モジュールの依存関係更新（週次 + セキュリティは即座）
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      interval: "daily"
+      time: "01:00"
       timezone: "Asia/Tokyo"
     open-pull-requests-limit: 10
     labels:
@@ -42,27 +41,6 @@ updates:
       # Goバージョンは手動管理
       - dependency-name: "go"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
-
-  # セキュリティアップデート専用（毎日チェック）
-  - package-ecosystem: "gomod"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "01:00"
-      timezone: "Asia/Tokyo"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "security"
-      - "go"
-    commit-message:
-      prefix: "chore(deps-security)"
-      include: "scope"
-    allow:
-      - dependency-type: "direct"
-        update-types: ["security"]
-      - dependency-type: "indirect"
-        update-types: ["security"]
 
   # GitHub Actions の更新（週次）
   - package-ecosystem: "github-actions"
