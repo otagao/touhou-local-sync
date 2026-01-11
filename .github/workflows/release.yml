@@ -34,11 +34,6 @@ jobs:
           chmod +x scripts/generate-release-footer.sh
           chmod +x scripts/fallback-notice.sh
 
-      - name: Generate NOTICE file
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          make license-generate
-
       - name: Generate release footer
         id: footer
         run: |

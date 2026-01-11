@@ -1,0 +1,44 @@
+NOTICE - Third-Party Software Licenses
+=======================================
+
+This software includes components distributed under the following licenses:
+
+-------------------------------------------------------------------------------
+1. github.com/inconshreveable/mousetrap
+   Version: v1.1.0
+   License: (See module repository for details)
+
+-------------------------------------------------------------------------------
+2. github.com/russross/blackfriday/v2
+   Version: v2.1.0
+   License: (See module repository for details)
+
+-------------------------------------------------------------------------------
+3. github.com/spf13/cobra
+   Version: v1.10.2
+   License: (See module repository for details)
+
+-------------------------------------------------------------------------------
+4. github.com/spf13/pflag
+   Version: v1.0.10
+   License: (See module repository for details)
+
+-------------------------------------------------------------------------------
+5. go.yaml.in/yaml/v3
+   Version: v3.0.4
+   License: (See module repository for details)
+
+-------------------------------------------------------------------------------
+6. gopkg.in/check.v1
+   Version: v0.0.0-20161208181325-20d25e280405
+   License: (See module repository for details)
+
+===============================================================================
+
+For the complete list of dependencies, please refer to the go.mod file in the
+source repository.
+
+Full license texts can be found at:
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0
+- MIT License: https://opensource.org/licenses/MIT
+- BSD Licenses: https://opensource.org/licenses/BSD-3-Clause
