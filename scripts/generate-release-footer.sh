@@ -13,7 +13,7 @@ cat <<EOF
 
 ## 📦 インストール方法 / Installation
 
-1. \`thlocalsync-vX.X.X-windows-amd64.zip\` をダウンロード
+1. \`thlocalsync-vX.X.X-windows-XXX.zip\` をダウンロード
 2. ZIPファイルを解凍
 3. \`thlocalsync.exe\` をUSBメモリの適切な場所に配置
 4. コマンドプロンプトまたはPowerShellから実行

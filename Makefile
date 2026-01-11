@@ -3,13 +3,17 @@
 # Project variables
 BINARY_NAME=thlocalsync.exe
 CMD_PATH=./cmd/thlocalsync
-LICENSE_TOOL_VERSION=latest
+LICENSE_TOOL_VERSION=v1.6.0
+
+# Go environment
+GOPATH ?= $(shell go env GOPATH)
+GO_LICENSES := $(GOPATH)/bin/go-licenses
 
 # Windows環境での注意:
-# go-licensesはLinux/macOS向けツールのため、以下の方法で実行してください：
-# 1. WSL2環境で実行: wsl make license-generate
-# 2. GitHub Actions上で実行（推奨）
-# 3. Git BashまたはMinGW環境で実行（動作不安定の可能性あり）
+# go-licensesはGo 1.25のツールチェーン形式に未対応のため、以下の制約があります：
+# - ローカルでのNOTICE生成: Go 1.23系が必要（WSL環境でgo1.23をインストール）
+# - GitHub Actions: 自動的に実行されます（推奨）
+# - 依存関係を追加した場合: GitHub Actionsに任せるか、WSLでGo 1.23を使用
 
 .PHONY: help
 help: ## Show this help message
@@ -59,17 +63,26 @@ install-license-tool: ## Install go-licenses tool
 .PHONY: license-generate
 license-generate: install-license-tool ## Generate NOTICE file with full license texts
 	@echo "Generating NOTICE file with full license texts..."
-	@go-licenses report $(CMD_PATH) \
+	@rm -f NOTICE.tmp
+	@$(GO_LICENSES) report $(CMD_PATH) \
 		--template=scripts/notice.tmpl \
-		--ignore=github.com/otagao/touhou-local-sync > NOTICE
-	@echo "NOTICE file updated successfully"
+		--ignore=github.com/otagao/touhou-local-sync \
+		--ignore=std > NOTICE.tmp 2>&1 || true
+	@if [ -s NOTICE.tmp ] && grep -q "github.com" NOTICE.tmp; then \
+		mv NOTICE.tmp NOTICE && echo "NOTICE file updated successfully"; \
+	else \
+		echo "Error: NOTICE generation failed or produced no output"; \
+		rm -f NOTICE.tmp; \
+		exit 1; \
+	fi
 
 .PHONY: license-check
 license-check: install-license-tool ## Check licenses for forbidden types
 	@echo "Checking licenses for forbidden types..."
-	@go-licenses check $(CMD_PATH) \
+	@$(GO_LICENSES) check $(CMD_PATH) \
 		--disallowed_types=forbidden,unknown \
-		--ignore=github.com/otagao/touhou-local-sync
+		--ignore=github.com/otagao/touhou-local-sync \
+		--ignore=std
 	@echo "License check passed"
 
 .PHONY: license-audit
