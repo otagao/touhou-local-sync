@@ -9,6 +9,9 @@ OUTPUT_FILE="${2:-NOTICE}"
 
 echo "Attempting fallback NOTICE generation..."
 
+# GOTOOLCHAIN=localの影響を回避（Go 1.25要求エラーを防ぐ）
+export GOTOOLCHAIN=auto
+
 # Step 1: go list で依存関係を取得
 echo "Step 1: Fetching dependencies using go list..."
 
