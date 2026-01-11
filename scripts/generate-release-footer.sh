@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ライセンステーブル部分を生成
-LICENSE_TABLE=$(./scripts/generate-license-table.sh)
+LICENSE_TABLE=$(bash "$(dirname "$0")/generate-license-table.sh")
 
 # Go言語のバージョンを取得
 GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
