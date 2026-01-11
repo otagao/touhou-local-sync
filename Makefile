@@ -63,17 +63,32 @@ install-license-tool: ## Install go-licenses tool
 .PHONY: license-generate
 license-generate: install-license-tool ## Generate NOTICE file with full license texts
 	@echo "Generating NOTICE file with full license texts..."
-	@rm -f NOTICE.tmp
+	@rm -f NOTICE.tmp NOTICE.err
+	@echo "Running: $(GO_LICENSES) report $(CMD_PATH) --template=scripts/notice.tmpl"
 	@$(GO_LICENSES) report $(CMD_PATH) \
 		--template=scripts/notice.tmpl \
 		--ignore=github.com/otagao/touhou-local-sync \
-		--ignore=std > NOTICE.tmp 2>&1 || true
-	@if [ -s NOTICE.tmp ] && grep -q "github.com" NOTICE.tmp; then \
-		mv NOTICE.tmp NOTICE && echo "NOTICE file updated successfully"; \
+		--ignore=std > NOTICE.tmp 2>NOTICE.err || true
+	@if [ -s NOTICE.err ]; then \
+		echo "Errors from go-licenses:"; \
+		cat NOTICE.err; \
+	fi
+	@if [ -s NOTICE.tmp ]; then \
+		if grep -q "github.com\|gopkg.in\|golang.org" NOTICE.tmp; then \
+			mv NOTICE.tmp NOTICE && echo "NOTICE file updated successfully"; \
+			echo "File size: $$(wc -c < NOTICE) bytes"; \
+			rm -f NOTICE.err; \
+		else \
+			echo "Warning: go-licenses produced output but no dependencies detected"; \
+			echo "Trying fallback method..."; \
+			bash scripts/fallback-notice.sh $(CMD_PATH) NOTICE; \
+			rm -f NOTICE.tmp NOTICE.err; \
+		fi; \
 	else \
-		echo "Error: NOTICE generation failed or produced no output"; \
-		rm -f NOTICE.tmp; \
-		exit 1; \
+		echo "Warning: go-licenses produced no output"; \
+		echo "Trying fallback method..."; \
+		bash scripts/fallback-notice.sh $(CMD_PATH) NOTICE; \
+		rm -f NOTICE.tmp NOTICE.err; \
 	fi
 
 .PHONY: license-check
