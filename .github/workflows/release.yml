@@ -47,3 +47,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_FOOTER_CONTENT: ${{ env.RELEASE_FOOTER }}
+          GOTOOLCHAIN: auto
