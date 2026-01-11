@@ -44,12 +44,15 @@ checksum:
 changelog:
   sort: asc
   use: github
+  abbrev: 7
   filters:
     exclude:
       - '^docs:'
       - '^test:'
       - '^chore:'
       - 'typo'
+      - 'Merge pull request'
+      - 'Merge branch'
       - label:ignore-for-release
       - label:duplicate
       - label:question
@@ -57,6 +60,10 @@ changelog:
       - label:wontfix
       - author:octocat
       - author:dependabot
+      - author:dependabot[bot]
+      - author:github-actions[bot]
+  format: |
+    {{ .SHA | printf "%.7s" }} {{ .Message }}
   groups:
     - title: 🚀 新機能 / New Features
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
