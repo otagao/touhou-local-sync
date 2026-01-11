@@ -16,6 +16,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          # Disable line ending conversion to prevent dirty git state
+          autocrlf: false
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -28,16 +30,10 @@ jobs:
           sudo apt-get install -y jq
           go install github.com/google/go-licenses@latest
 
-      - name: Make scripts executable
-        run: |
-          chmod +x scripts/generate-license-table.sh
-          chmod +x scripts/generate-release-footer.sh
-          chmod +x scripts/fallback-notice.sh
-
       - name: Generate release footer
         id: footer
         run: |
-          FOOTER=$(./scripts/generate-release-footer.sh)
+          FOOTER=$(bash scripts/generate-release-footer.sh)
           echo "RELEASE_FOOTER<<EOF" >> $GITHUB_ENV
           echo "$FOOTER" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
