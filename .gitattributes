@@ -1,0 +1,29 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Shell scripts must use LF line endings (for Unix/Linux compatibility)
+*.sh text eol=lf
+
+# Batch files must use CRLF line endings (for Windows compatibility)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Go files use LF
+*.go text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# YAML files
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Configuration files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+go.mod text eol=lf
+go.sum text eol=lf
+Makefile text eol=lf
