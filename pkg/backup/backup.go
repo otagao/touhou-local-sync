@@ -15,6 +15,10 @@ import (
 const (
 	// HistoryDir is the subdirectory name for history backups
 	HistoryDir = "_history"
+	// ReplayArchiveDir is the subdirectory name for replay archives
+	ReplayArchiveDir = "replay_archive"
+	// SnapshotArchiveDir is the subdirectory name for snapshot archives
+	SnapshotArchiveDir = "snapshot_archive"
 )
 
 // GetVaultDir returns the path to the vault directory.
@@ -49,6 +53,42 @@ func GetHistoryDir(title string) (string, error) {
 	}
 
 	return filepath.Join(vaultDir, title, HistoryDir), nil
+}
+
+// GetReplayArchiveDir returns the path to a title's replay archive directory.
+// Example: <vault>/th08/replay_archive
+func GetReplayArchiveDir(title string) (string, error) {
+	vaultDir, err := GetVaultDir()
+	if err != nil {
+		return "", err
+	}
+
+	archiveDir := filepath.Join(vaultDir, title, ReplayArchiveDir)
+
+	// Ensure directory exists
+	if err := utils.EnsureDir(archiveDir); err != nil {
+		return "", fmt.Errorf("failed to create replay archive directory: %w", err)
+	}
+
+	return archiveDir, nil
+}
+
+// GetSnapshotArchiveDir returns the path to a title's snapshot archive directory.
+// Example: <vault>/th08/snapshot_archive
+func GetSnapshotArchiveDir(title string) (string, error) {
+	vaultDir, err := GetVaultDir()
+	if err != nil {
+		return "", err
+	}
+
+	archiveDir := filepath.Join(vaultDir, title, SnapshotArchiveDir)
+
+	// Ensure directory exists
+	if err := utils.EnsureDir(archiveDir); err != nil {
+		return "", fmt.Errorf("failed to create snapshot archive directory: %w", err)
+	}
+
+	return archiveDir, nil
 }
 
 // CreateBackup creates a backup of the specified file in the history directory.

@@ -297,3 +297,29 @@ func PromptManualPath(title KnownTitle) (string, error) {
 
 	return path, nil
 }
+
+// DetectReplayDir returns the replay directory path if it exists.
+// Returns empty string if not found.
+func DetectReplayDir(scorePath string) string {
+	scoreDir := filepath.Dir(scorePath)
+	replayDir := filepath.Join(scoreDir, "replay")
+
+	if utils.DirExists(replayDir) {
+		return replayDir
+	}
+
+	return ""
+}
+
+// DetectSnapshotDir returns the snapshot directory path if it exists.
+// Returns empty string if not found.
+func DetectSnapshotDir(scorePath string) string {
+	scoreDir := filepath.Dir(scorePath)
+	snapshotDir := filepath.Join(scoreDir, "snapshot")
+
+	if utils.DirExists(snapshotDir) {
+		return snapshotDir
+	}
+
+	return ""
+}

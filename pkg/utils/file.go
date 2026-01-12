@@ -112,3 +112,33 @@ func FileExists(path string) (exists bool, readable bool) {
 func ExpandEnvPath(path string) string {
 	return os.ExpandEnv(path)
 }
+
+// DirExists checks if a directory exists and is accessible.
+func DirExists(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return info.IsDir()
+}
+
+// ListFilesWithExtension returns all files with the specified extension in a directory.
+// ext should include the dot (e.g., ".rpy", ".bmp")
+func ListFilesWithExtension(dir, ext string) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	var files []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if filepath.Ext(entry.Name()) == ext {
+			files = append(files, entry.Name())
+		}
+	}
+
+	return files, nil
+}
