@@ -6,7 +6,9 @@
 
 ## 概要
 
-複数のWindows PCで東方Project原作STGのセーブデータ（例：`score.dat`）を **ポータブルストレージ（USBメモリ等）上の正本（ハブ）** に集約し、手動でPull/Pushするオフライン同期ツールです。
+Windows PC上に存在する東方Project原作STGのセーブデータ（スコア、リプレイ、スナップショット）を、半自動で保存・上書き配布することができるツールです。
+
+複数デバイスを認識し、それぞれ異なる保存場所を記録することができます。USBメモリなどのポータブルストレージ上で運用することで、複数端末間でオフライン同期を行うことが可能になります。
 
 ### 特徴
 
@@ -40,34 +42,6 @@ D:\Games\Touhou\
 - **実行形態**: 単一 exe（ポータブルストレージ直置き）
 - **権限**: 標準ユーザ（管理者不要）
 - **開発言語**: Go 1.25+
-
-## インストール
-
-### ビルド方法
-
-```bash
-# Windowsバイナリのビルド
-go build -o thlocalsync.exe ./cmd/thlocalsync
-```
-
-### ポータブルストレージ内ディレクトリ構成
-
-```
-/THLocalSync/
-  thlocalsync.exe
-  /data/
-    devices.json
-    paths.json
-    rules.json
-  /vault/
-    th06/
-      main/score.dat
-      _history/2025-11-11T06-20Z-score.dat
-    th08/
-      main/scoreth08.dat
-  /logs/
-    2025-11-11.log
-```
 
 ## 使い方
 
