@@ -47,14 +47,14 @@ D:\Games\Touhou\
 
 ### 初回セットアップ
 
-1. ポータブルストレージを接続
+1. ポータブルストレージを接続し、保存先としたいディレクトリにthlocalsync.exeを配置
 2. セーブデータを半自動認識して登録:
 
 ```bash
 thlocalsync detect
 ```
 
-ゲーム本体がまとまっている親フォルダを指定するか、以下のようにオプションで指定できます：
+対話型ダイアログが不要な場合は以下のオプションでパスを指定できます：
 
 ```bash
 thlocalsync detect --gamedir "D:\Games\Touhou"
