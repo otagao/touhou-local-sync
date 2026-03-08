@@ -7,6 +7,10 @@ LICENSE_TABLE=$(bash "$(dirname "$0")/generate-license-table.sh")
 # Go言語のバージョンを取得
 GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
 
+# タグ情報を取得
+CURRENT_TAG=$(git describe --tags --abbrev=0 HEAD 2>/dev/null || echo "")
+PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
 # フッター全体を構築
 cat <<EOF
 ---
@@ -52,5 +56,5 @@ ${LICENSE_TABLE}
 
 ---
 
-**Full Changelog**: https://github.com/otagao/touhou-local-sync/compare/\$PREVIOUS_TAG...\$CURRENT_TAG
+**Full Changelog**: https://github.com/otagao/touhou-local-sync/compare/${PREVIOUS_TAG}...${CURRENT_TAG}
 EOF
