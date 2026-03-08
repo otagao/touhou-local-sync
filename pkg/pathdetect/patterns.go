@@ -10,12 +10,13 @@ import (
 
 // KnownTitle represents a known Touhou title with its detection patterns.
 type KnownTitle struct {
-	Code        string   // Title code (e.g., "th06", "th08")
-	Name        string   // Display name
-	Patterns    []string // Path patterns to search
-	UseAppData  bool     // If true, search in %APPDATA%
-	UseGameDir  bool     // If true, ask user for game directory
-	FileName    string   // Expected filename (e.g., "score.dat")
+	Code            string   // Title code (e.g., "th06", "th08")
+	Name            string   // Display name
+	Patterns        []string // Path patterns to search
+	UseAppData      bool     // If true, search in %APPDATA%
+	UseGameDir      bool     // If true, ask user for game directory
+	FileName        string   // Expected filename (e.g., "score.dat")
+	BestshotSubDir  string   // Subdirectory name containing bestshot files (empty if none)
 }
 
 // GetKnownTitles returns a list of known Touhou titles with their detection patterns.
@@ -67,10 +68,11 @@ func GetKnownTitles() []KnownTitle {
 		},
 		// th095, th10: scorethXX.dat in game directory, may also be in VirtualStore
 		{
-			Code:       "th095",
-			Name:       "東方文花帖",
-			UseGameDir: true,
-			FileName:   "scoreth095.dat",
+			Code:           "th095",
+			Name:           "東方文花帖",
+			UseGameDir:     true,
+			FileName:       "scoreth095.dat",
+			BestshotSubDir: "bestshot",
 			Patterns: []string{
 				filepath.Join(localAppData, `VirtualStore\Program Files\上海アリス幻樂団\東方文花帖\scoreth095.dat`),
 				filepath.Join(localAppData, `VirtualStore\Program Files (x86)\上海アリス幻樂団\東方文花帖\scoreth095.dat`),
@@ -103,10 +105,11 @@ func GetKnownTitles() []KnownTitle {
 		},
 		// th125+: scorethXX.dat in AppData/Roaming/ShanghaiAlice
 		{
-			Code:       "th125",
-			Name:       "ダブルスポイラー",
-			UseAppData: true,
-			FileName:   "scoreth125.dat",
+			Code:           "th125",
+			Name:           "ダブルスポイラー",
+			UseAppData:     true,
+			FileName:       "scoreth125.dat",
+			BestshotSubDir: "bestshot",
 			Patterns: []string{
 				filepath.Join(appData, `ShanghaiAlice\th125\scoreth125.dat`),
 			},
@@ -166,10 +169,11 @@ func GetKnownTitles() []KnownTitle {
 			},
 		},
 		{
-			Code:       "th165",
-			Name:       "秘封ナイトメアダイアリー",
-			UseAppData: true,
-			FileName:   "scoreth165.dat",
+			Code:           "th165",
+			Name:           "秘封ナイトメアダイアリー",
+			UseAppData:     true,
+			FileName:       "scoreth165.dat",
+			BestshotSubDir: "savedata",
 			Patterns: []string{
 				filepath.Join(appData, `ShanghaiAlice\th165\scoreth165.dat`),
 			},

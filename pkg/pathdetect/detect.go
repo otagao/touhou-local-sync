@@ -298,6 +298,25 @@ func PromptManualPath(title KnownTitle) (string, error) {
 	return path, nil
 }
 
+// DetectBestshotDir returns the bestshot directory path if it exists.
+// The subdirectory name varies by title (e.g., "bestshot" for th095/th125, "savedata" for th165).
+// Returns empty string if the title has no bestshot feature or the directory does not exist.
+func DetectBestshotDir(titleCode, scorePath string) string {
+	title := GetTitleByCode(titleCode)
+	if title == nil || title.BestshotSubDir == "" {
+		return ""
+	}
+
+	scoreDir := filepath.Dir(scorePath)
+	bestshotDir := filepath.Join(scoreDir, title.BestshotSubDir)
+
+	if utils.DirExists(bestshotDir) {
+		return bestshotDir
+	}
+
+	return ""
+}
+
 // DetectReplayDir returns the replay directory path if it exists.
 // Returns empty string if not found.
 func DetectReplayDir(scorePath string) string {

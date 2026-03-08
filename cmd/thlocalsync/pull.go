@@ -208,6 +208,15 @@ func pullTitle(title, deviceID string, pathsConfig *models.PathsConfig, log *log
 		// Don't return error - snapshot archiving is optional
 	}
 
+	// Archive bestshots if present (th095, th125, th165)
+	if err := archiveBestshotsIfPresent(title, localPath, log); err != nil {
+		log.Error("bestshot_archive_error", map[string]interface{}{
+			"title": title,
+			"error": err.Error(),
+		})
+		// Don't return error - bestshot archiving is optional
+	}
+
 	return nil
 }
 
@@ -323,6 +332,93 @@ func archiveReplaysIfPresent(title, localPath string, log *logger.Logger) error 
 
 	// Log summary
 	log.Info("replay_archive_complete", map[string]interface{}{
+		"title":    title,
+		"archived": archiveCount,
+		"skipped":  skipCount,
+	})
+
+	return nil
+}
+
+// archiveBestshotsIfPresent archives bestshot files if the bestshot directory exists.
+// Applies to th095/th125 (bestshot/ subdir) and th165 (savedata/ subdir).
+func archiveBestshotsIfPresent(title, localPath string, log *logger.Logger) error {
+	// Detect bestshot directory (returns "" if title has no bestshot or dir missing)
+	bestshotDir := pathdetect.DetectBestshotDir(title, localPath)
+	if bestshotDir == "" {
+		return nil
+	}
+
+	// List .dat files (bs_XX_X.dat / bsXX_XX.dat)
+	datFiles, err := utils.ListFilesWithExtension(bestshotDir, ".dat")
+	if err != nil {
+		return fmt.Errorf("failed to list bestshot files: %w", err)
+	}
+
+	if len(datFiles) == 0 {
+		log.Info("no_bestshot_files", map[string]interface{}{
+			"title": title,
+		})
+		return nil
+	}
+
+	// Get archive directory
+	archiveDir, err := backup.GetBestshotArchiveDir(title)
+	if err != nil {
+		return fmt.Errorf("failed to get bestshot archive directory: %w", err)
+	}
+
+	archiveCount := 0
+	skipCount := 0
+
+	for _, datFile := range datFiles {
+		srcPath := filepath.Join(bestshotDir, datFile)
+
+		// Calculate hash
+		hash, err := utils.CalculateFileHash(srcPath)
+		if err != nil {
+			log.Warn("bestshot_hash_failed", map[string]interface{}{
+				"title": title,
+				"file":  datFile,
+				"error": err.Error(),
+			})
+			continue
+		}
+
+		// Check if hash already exists in archive
+		if hashExistsInArchive(archiveDir, hash) {
+			skipCount++
+			continue
+		}
+
+		// Get file modification time
+		fileInfo, err := os.Stat(srcPath)
+		if err != nil {
+			log.Warn("bestshot_stat_failed", map[string]interface{}{
+				"title": title,
+				"file":  datFile,
+				"error": err.Error(),
+			})
+			continue
+		}
+
+		// Generate archive filename: YYYY-MM-DD_HH-MM-SS_originalname
+		archiveName := fmt.Sprintf("%s_%s", fileInfo.ModTime().Format("2006-01-02_15-04-05"), datFile)
+		archivePath := filepath.Join(archiveDir, archiveName)
+
+		if err := utils.AtomicCopy(srcPath, archivePath); err != nil {
+			log.Error("bestshot_archive_failed", map[string]interface{}{
+				"title": title,
+				"file":  datFile,
+				"error": err.Error(),
+			})
+			continue
+		}
+
+		archiveCount++
+	}
+
+	log.Info("bestshot_archive_complete", map[string]interface{}{
 		"title":    title,
 		"archived": archiveCount,
 		"skipped":  skipCount,

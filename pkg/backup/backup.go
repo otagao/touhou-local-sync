@@ -19,6 +19,8 @@ const (
 	ReplayArchiveDir = "replay_archive"
 	// SnapshotArchiveDir is the subdirectory name for snapshot archives
 	SnapshotArchiveDir = "snapshot_archive"
+	// BestshotArchiveDir is the subdirectory name for bestshot archives
+	BestshotArchiveDir = "bestshot_archive"
 )
 
 // GetVaultDir returns the path to the vault directory.
@@ -68,6 +70,24 @@ func GetReplayArchiveDir(title string) (string, error) {
 	// Ensure directory exists
 	if err := utils.EnsureDir(archiveDir); err != nil {
 		return "", fmt.Errorf("failed to create replay archive directory: %w", err)
+	}
+
+	return archiveDir, nil
+}
+
+// GetBestshotArchiveDir returns the path to a title's bestshot archive directory.
+// Example: <vault>/th095/bestshot_archive
+func GetBestshotArchiveDir(title string) (string, error) {
+	vaultDir, err := GetVaultDir()
+	if err != nil {
+		return "", err
+	}
+
+	archiveDir := filepath.Join(vaultDir, title, BestshotArchiveDir)
+
+	// Ensure directory exists
+	if err := utils.EnsureDir(archiveDir); err != nil {
+		return "", fmt.Errorf("failed to create bestshot archive directory: %w", err)
 	}
 
 	return archiveDir, nil
